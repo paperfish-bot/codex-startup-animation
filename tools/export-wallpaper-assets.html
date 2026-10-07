@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>生成启动动画素材</title>
+  <style>
+    :root{color-scheme:dark;font:16px/1.6 system-ui,"Microsoft YaHei",sans-serif}
+    body{max-width:760px;margin:32px auto;padding:0 20px;background:#101326;color:#f4f1ff}
+    h1{font-size:1.6rem}section{background:#1c2040;border:1px solid #44436b;border-radius:16px;padding:22px;margin:20px 0}
+    label{display:block;margin:12px 0}input{max-width:100%}input[type=number]{width:7em;padding:5px}
+    button,a.download{display:inline-block;padding:9px 16px;border:0;border-radius:9px;background:#d5a2d8;color:#171427;font:inherit;text-decoration:none;cursor:pointer;margin:8px 8px 8px 0}
+    a.download[hidden]{display:none}small{color:#c7c5d5}#status{min-height:1.6em}
+  </style>
+</head>
+<body>
+  <h1>生成启动动画素材</h1>
+  <p>文件只在这台电脑的浏览器里处理，不会上传。请使用你有权公开的图片或视频。</p>
+  <section>
+    <h2>背景和粒子线稿</h2>
+    <label>从图片生成：<input id="picture" type="file" accept="image/png,image/jpeg,image/webp"></label>
+    <label>或从视频截帧：<input id="video" type="file" accept="video/mp4,video/webm,video/ogg"></label>
+    <label>截帧时间（秒）：<input id="second" type="number" min="0" step="0.1" value="3.7"></label>
+    <small>选了图片时优先使用图片。背景会居中裁成 16:9，线稿从同一画面生成。</small><br>
+    <button id="make-background" type="button">生成背景素材</button><br>
+    <a id="background-link" class="download" hidden>下载 artwork.jpg</a>
+    <a id="contours-link" class="download" hidden>下载 contours.js</a>
+  </section>
+  <section>
+    <h2>开场头像（可选）</h2>
+    <label>头像图片：<input id="avatar" type="file" accept="image/png,image/jpeg,image/webp"></label>
+    <button id="make-avatar" type="button">生成头像素材</button><br>
+    <a id="avatar-link" class="download" hidden>下载 avatar.jpg</a>
+  </section>
+  <section>
+    <h2>动画文字（可选）</h2>
+    <label>头像下方标题：<input id="intro-title" type="text" maxlength="16" value="Welcome"></label>
+    <label>标题下方小字：<input id="intro-caption" type="text" maxlength="48" value="CODEX INITIALIZE / TYPE-0"></label>
+    <label>背景下方字幕：<input id="artwork-subtitle" type="text" maxlength="60" placeholder="留空则不显示"></label>
+    <button id="make-text" type="button">生成文字配置</button><br>
+    <a id="text-link" class="download" hidden>下载 config.js</a>
+  </section>
+  <p id="status" role="status" aria-live="polite"></p>
+  <p>把下载的文件放进项目 <code>assets</code> 文件夹，替换同名文件，再运行安装或构建命令。动态背景还要把有权使用的原视频复制为 <code>assets/wallpaper.mp4</code>。</p>
+  <script src="../image-settings.js"></script>
+  <script>
+    'use strict';
+    const $=id=>document.getElementById(id);
+    const status=text=>$('status').textContent=text;
+    const urls=[];
+    function setDownload(id, blob, name){
+      const a=$(id);if(a.href.startsWith('blob:'))URL.revokeObjectURL(a.href);
+      a.href=URL.createObjectURL(blob);urls.push(a.href);a.download=name;a.hidden=false;
+    }
+    async function jpegFromDataUrl(dataUrl){
+      const image=new Image();image.src=dataUrl;await image.decode();
+      const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+      canvas.getContext('2d').drawImage(image,0,0);
+      return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('图片编码失败')),'image/jpeg',.92));
+    }
+    async function frameFromVideo(file,time){
+      const url=URL.createObjectURL(file),video=document.createElement('video');video.preload='auto';video.muted=true;
+      try{
+        video.src=url;
+        await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('无法读取视频，请改用 MP4 或先导出截图'));});
+        const end=Number.isFinite(video.duration)?Math.max(0,video.duration-.1):Number(time)||0;
+        const second=Math.max(0,Math.min(Number(time)||0,end));
+        if(second<.01){
+          if(video.readyState<2)await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=()=>reject(new Error('视频截帧失败'));});
+        }else await new Promise((resolve,reject)=>{video.onseeked=resolve;video.onerror=()=>reject(new Error('视频截帧失败'));video.currentTime=second;});
+        const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+        canvas.getContext('2d').drawImage(video,0,0);
+        const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('视频截帧失败')),'image/jpeg',.95));
+        return new File([blob],'frame.jpg',{type:'image/jpeg'});
+      }finally{video.src='';URL.revokeObjectURL(url);}
+    }
+    $('make-background').addEventListener('click',async()=>{
+      try{
+        const picture=$('picture').files[0],video=$('video').files[0];
+        if(!picture&&!video)throw new Error('请先选择图片或视频。');
+        status('正在生成背景和线稿，请稍等…');
+        const source=picture||await frameFromVideo(video,$('second').value);
+        const result=await imageSettings.importImage(source,'artwork');
+        setDownload('background-link',await jpegFromDataUrl(result.artwork),'artwork.jpg');
+        setDownload('contours-link',new Blob([`window.CONTOUR_PATHS=${JSON.stringify(result.contours)};\n`],{type:'text/javascript'}),'contours.js');
+        status(`完成：生成了 ${result.contours.length} 条线稿。请分别下载两个文件。`);
+      }catch(error){status('生成失败：'+(error.message||error));}
+    });
+    $('make-avatar').addEventListener('click',async()=>{
+      try{
+        const file=$('avatar').files[0];if(!file)throw new Error('请先选择头像图片。');
+        status('正在处理头像…');
+        const result=await imageSettings.importImage(file,'avatar');
+        setDownload('avatar-link',await jpegFromDataUrl(result.avatar),'avatar.jpg');
+        status('头像已生成，可以下载。');
+      }catch(error){status('生成失败：'+(error.message||error));}
+    });
+    $('make-text').addEventListener('click',()=>{
+      const values={introTitle:$('intro-title').value,introCaption:$('intro-caption').value,
+        artworkSubtitle:$('artwork-subtitle').value};
+      setDownload('text-link',new Blob([`window.STARTUP_TEXT=${JSON.stringify(values)};\n`],
+        {type:'text/javascript'}),'config.js');
+      status('文字配置已生成。下载后复制到 assets 文件夹。');
+    });
+    addEventListener('beforeunload',()=>urls.forEach(url=>URL.revokeObjectURL(url)));
+  </script>
+</body>
+</html>

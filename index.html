@@ -3,27 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'">
-  <title>爱弥斯 · 12 秒启动动画</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>Codex 启动动画 · 预览</title>
   <link rel="stylesheet" href="style.css">
   <script src="assets/contours.js" defer></script>
+  <script src="assets/config.js" defer></script>
   <script src="image-settings.js" defer></script>
   <script src="animation.js" defer></script>
 </head>
 <body>
   <main class="preview">
-    <header class="preview-heading"><span><i></i> AEMEATH</span><span>STARTUP SEQUENCE / 01</span></header>
-    <section class="window" aria-label="爱弥斯启动动画">
+    <header class="preview-heading"><span><i></i> STARTUP ANIMATION</span><span>STARTUP SEQUENCE / 01</span></header>
+    <section class="window" aria-label="Codex 启动动画预览">
       <div class="end-screen" aria-live="polite">
         <span class="end-star">✧</span>
         <p class="eyebrow">CONNECTION ESTABLISHED</p>
-        <h1>幽灵，已在你身边。</h1>
+        <h1>动画已完成</h1>
         <p class="end-description">12 秒开场预览结束</p>
         <button class="replay-end" type="button">再看一次 <span>↻</span></button>
       </div>
       <div class="scene" aria-hidden="true">
         <img class="artwork" src="assets/artwork.jpg" alt="" decoding="async" fetchpriority="high">
-        <canvas class="line-art" width="1536" height="1024"></canvas>
+        <video class="artwork-motion" src="assets/wallpaper.mp4" muted loop playsinline preload="auto" aria-hidden="true"></video>
+        <canvas class="line-art-static" width="1920" height="1080"></canvas>
+        <canvas class="line-art" width="1920" height="1080"></canvas>
         <div class="shade"></div>
         <div class="scanlines"></div>
         <div class="light-sweep"></div>
@@ -36,8 +39,8 @@
             <div class="sync-track"><div class="sync-fill"></div></div>
             <span class="sync-phase">INITIALIZING</span>
           </div>
-          <div class="subtitle"><span id="subtitle">幽灵来到…你身边～</span></div>
-          <div class="coordinates"><span>RESONANCE / AEMEATH</span><span id="timecode">00:00:00</span></div>
+          <div class="subtitle" hidden><span id="subtitle"></span></div>
+          <div class="coordinates"><span>STARTUP / PREVIEW</span><span id="timecode">00:00:00</span></div>
         </div>
         <div class="boot-grid"></div>
         <div class="boot-corners"><i class="corner top-left"></i><i class="corner top-right"></i><i class="corner bottom-left"></i><i class="corner bottom-right"></i></div>
@@ -50,11 +53,11 @@
               <i class="reticle tl"></i><i class="reticle tr"></i><i class="reticle bl"></i><i class="reticle br"></i>
             </div>
             <svg class="wave" viewBox="0 0 400 22"><path d="M0 11 Q15 5 30 11 T60 11 T90 11 T120 11 T150 11 T180 11 T210 11 T240 11 T270 11 T300 11 T330 11 T360 11 T400 11"/></svg>
-            <div class="boot-title">飞行雪绒</div>
+            <div class="boot-title">Welcome</div>
             <div class="boot-caption">CODEX INITIALIZE / TYPE-0</div>
           </div>
         </div>
-        <div class="boot-logs"><div>&gt; MAGI SYSTEM · CASPER / MELCHIOR / BALTHASAR</div><div>&gt; loading renderer surface ........ ok</div><div>&gt; entry plug depth 21.6 ........... ok</div><div>&gt; LCL pressure nominal</div></div>
+        <div class="boot-logs"><div>&gt; preparing startup animation .... ok</div><div>&gt; loading renderer surface ........ ok</div><div>&gt; loading image assets ............ ok</div><div>&gt; waiting for application ........ ok</div></div>
         <div class="transition-flash" aria-hidden="true"></div>
       </div>
       <div class="shutter-line" aria-hidden="true"></div>
@@ -68,7 +71,7 @@
         <p class="settings-description">自定义两张图片和下方文字，留空可隐藏对应文字。</p>
         <div class="image-choices">
           <label class="image-choice"><img id="avatar-preview" src="assets/avatar.jpg" alt="当前头像"><span>前半段头像</span><small>方形图片效果最好</small><span class="choose-label">更换头像</span><input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" aria-label="更换头像"></label>
-          <label class="image-choice"><img id="artwork-preview" src="assets/artwork.jpg" alt="当前背景"><span>后半段背景</span><small>推荐 3:2 横图 · 自动生成线稿</small><span class="choose-label">更换背景</span><input id="artwork-file" type="file" accept="image/png,image/jpeg,image/webp" aria-label="更换背景"></label>
+          <label class="image-choice"><img id="artwork-preview" src="assets/artwork.jpg" alt="当前背景"><span>后半段背景</span><small>推荐 16:9 横图 · 自动生成线稿</small><span class="choose-label">更换背景</span><input id="artwork-file" type="file" accept="image/png,image/jpeg,image/webp" aria-label="更换背景"></label>
         </div>
         <div class="text-settings">
           <label for="intro-title">前半段 · 头像下方标题<input id="intro-title" type="text" maxlength="16" autocomplete="off"><small>最多 16 字</small></label>

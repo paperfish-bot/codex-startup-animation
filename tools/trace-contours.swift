@@ -12,7 +12,7 @@ var paths = [[[Double]]]()
 for index in 0..<observation.contourCount {
     let contour = try observation.contour(at: index)
     let polygon = try contour.polygonApproximation(epsilon: 0.00065)
-    let points = polygon.normalizedPoints.map { [Double(($0.x * 1536).rounded()), Double(((1 - $0.y) * 1024).rounded())] }
+    let points = polygon.normalizedPoints.map { [Double(($0.x * 1920).rounded()), Double(((1 - $0.y) * 1080).rounded())] }
     guard points.count >= 5 else { continue }
     let length = zip(points, points.dropFirst()).reduce(0.0) { $0 + hypot($1.0[0] - $1.1[0], $1.0[1] - $1.1[1]) }
     if length > 20 { paths.append(points + [points[0]]) }

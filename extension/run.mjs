@@ -27,7 +27,7 @@ export async function verifyListener(port,bundle){
   }
 }
 async function main(){
-  const i=process.argv.indexOf('--bundle');if(i<0||!process.argv[i+1])throw new Error('请从粉色图标的「Codex」应用启动');
+  const i=process.argv.indexOf('--bundle');if(i<0||!process.argv[i+1])throw new Error('请从 Startup Animation 启动器打开');
   const bundle=await realpath(process.argv[i+1]);
   await command('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
   const identifier=await command('/usr/libexec/PlistBuddy',['-c','Print :CFBundleIdentifier',join(bundle,'Contents/Info.plist')]);

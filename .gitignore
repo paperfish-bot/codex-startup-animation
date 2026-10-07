@@ -1,5 +1,6 @@
 .build/
 dist/
+WebViewProfile/
 .DS_Store
 __pycache__/
 
@@ -7,6 +8,8 @@ __pycache__/
 assets/bg1/
 assets/bg2/
 assets/codex-pink.png
+assets/demo-artwork.png
+assets/demo-avatar.png
 
 # Reference-video inspection is only used during local development.
 tools/extract-reference.swift

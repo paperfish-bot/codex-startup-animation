@@ -31,7 +31,7 @@
         }
         previous=current;current=next;
       }
-      if(points.length>=8)paths.push(points.filter((_,i)=>i%2===0||i===points.length-1).map(([x,y])=>[Math.round(x*1536/width),Math.round(y*1024/height)]));
+      if(points.length>=8)paths.push(points.filter((_,i)=>i%2===0||i===points.length-1).map(([x,y])=>[Math.round(x*1920/width),Math.round(y*1080/height)]));
     }
     // Start at endpoints first, then trace the remaining closed loops.
     for(let i=0;i<count;i++)if(edge[i]&&!visited[i]&&neighbors.reduce((n,d)=>n+(edge[i+d]||0),0)<=1)walk(i);
@@ -58,16 +58,16 @@
     const url=URL.createObjectURL(file),img=new Image();
     try{
       img.src=url;await img.decode();
-      const canvas=document.createElement('canvas');canvas.width=kind==='avatar'?512:1536;canvas.height=kind==='avatar'?512:1024;
+      const canvas=document.createElement('canvas');canvas.width=kind==='avatar'?768:2304;canvas.height=kind==='avatar'?768:1296;
       const ctx=canvas.getContext('2d');ctx.fillStyle='#08060d';ctx.fillRect(0,0,canvas.width,canvas.height);
       const scale=Math.max(canvas.width/img.naturalWidth,canvas.height/img.naturalHeight);
       const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
       ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)/2,w,h);
       const image=canvas.toDataURL('image/png');
       if(kind==='avatar')return {avatar:image};
-      const small=document.createElement('canvas');small.width=768;small.height=512;
-      const smallCtx=small.getContext('2d',{willReadFrequently:true});smallCtx.drawImage(canvas,0,0,768,512);
-      const contours=vectorize(smallCtx.getImageData(0,0,768,512).data,768,512);
+      const small=document.createElement('canvas');small.width=960;small.height=540;
+      const smallCtx=small.getContext('2d',{willReadFrequently:true});smallCtx.drawImage(canvas,0,0,960,540);
+      const contours=vectorize(smallCtx.getImageData(0,0,960,540).data,960,540);
       if(!contours.length)throw new Error('图片轮廓太少，请选择边缘更清晰的背景。');
       return {artwork:image,contours};
     }catch(error){throw new Error(error.message||'图片无法读取，请换一张图片。');}
